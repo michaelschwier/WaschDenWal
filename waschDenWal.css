@@ -1,8 +1,8 @@
 #gameContainer {
 	position: relative;
 	background-size: 100%;
-	width: 460px;
-	height: auto;
+	width: 400px;
+	height: 200px;
 	margin: 0 auto;
 	padding-top: 24px;
 	-webkit-user-select: none;  
@@ -14,5 +14,4 @@
 #gameContainer canvas {
 	margin: 0;
 	padding: 0;
-	width: 460px;
 }
