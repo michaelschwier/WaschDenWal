@@ -31,32 +31,87 @@
 
 (function() {
   
-  // Global variables
+  // ----- Global variables -------------------------------
   var whale;
+  var waveFront;
+  var waveBack;
+  var canvas;
   
-  // Main game lop
+  // ----- Main game lop ----------------------------------
   function gameLoop () 
   {
     window.requestAnimationFrame(gameLoop);
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
+    waveFront.update();
+    waveBack.update();
+
+    waveBack.render();
     whale.render();
+    waveFront.render();
   }
   
-  // Whale Sprite
-  function WhaleSprite(options)
+  
+  // ----- Wave Animation Object -------------------------
+  function Wave(options)
+  {
+    var verticalRelPos = 0.0;
+    var horizontalRelPos = 0.0;
+    var verticalStepSize = Math.PI / options.verticalSteps;
+    var horizontalStepSize = Math.PI / options.horizontalSteps;
+    var verticalMoveRange = options.verticalMoveRange;
+    var horizontalMoveRange = options.horizontalMoveRange;
+
+    this.context = options.context;
+    this.width = options.width;
+    this.height = options.height;
+    this.x = options.x;
+    this.y = options.y;
+    this.image = options.image;
+
+    this.update = function()
+    {
+      verticalRelPos += verticalStepSize;
+      if (verticalRelPos > (2 * Math.PI)) {
+        verticalRelPos -= (2 *Math.PI);
+      }
+      horizontalRelPos += horizontalStepSize;
+      if (horizontalRelPos > (2 * Math.PI)) {
+        horizontalRelPos -= (2 *Math.PI);
+      }    
+    }
+
+    this.render = function()
+    {
+      this.context.drawImage(
+        this.image,
+        horizontalMoveRange + Math.sin(horizontalRelPos) * horizontalMoveRange,
+        verticalMoveRange + Math.sin(verticalRelPos) * verticalMoveRange,
+        this.width,
+        this.height,
+        this.x,
+        this.y,
+        this.width,
+        this.height);
+    }
+  }
+  
+  
+  // ----- Whale Game Object ------------------------------
+  function Whale(options)
   {
     var frameIndex = 0;
     var tickCount = 0;
     var ticksPerFrame = options.ticksPerFrame || 0;
     var numberOfFrames = options.numberOfFrames || 1;
     
-    var that = {};
-    that.context = options.context;
-    that.width = options.width;
-    that.height = options.height;
-    that.image = options.image;
-    that.isClean = false;
+    this.context = options.context;
+    this.width = options.width;
+    this.height = options.height;
+    this.image = options.image;
+    this.isClean = false;
 
-    that.update = function(addTicks) 
+    this.update = function(addTicks) 
     {
       tickCount += addTicks;
       if (tickCount > ticksPerFrame) {
@@ -66,38 +121,33 @@
         } 
         else {
           frameIndex = 9;
-          that.isClean = true;
+          this.isClean = true;
         }
       }
     };
 
-    that.reset = function()
+    this.reset = function()
     {
       frameIndex = 0;
-      that.isClean = false;
+      this.isClean = false;
     }
 
-    that.render = function() 
+    this.render = function() 
     {
-      // Clear the canvas
-      that.context.clearRect(0, 0, that.width, that.height);
-      
-      // Draw the animation
-      that.context.drawImage(
-        that.image,
-        frameIndex * that.width / numberOfFrames,
+      this.context.drawImage(
+        this.image,
+        frameIndex * this.width / numberOfFrames,
         0,
-        that.width / numberOfFrames,
-        that.height,
+        this.width / numberOfFrames,
+        this.height,
         0,
         0,
-        that.width / numberOfFrames,
-        that.height);
+        this.width / numberOfFrames,
+        this.height);
     };
-    return that;
   }
 
-  // Event Handlers
+  // ----- Event Handlers ---------------------------------
   function handleTouchMove(e)
   {
     whale.update(1);
@@ -110,9 +160,8 @@
     }
   }
   
-  // ----- MAIN ----
+  // ----- MAIN -------------------------------------------
   // Get canvas
-  var canvas;          
   canvas = document.getElementById("gameCanvas");
   canvas.width = 400;
   canvas.height = 200;
@@ -122,18 +171,48 @@
   whaleImage = new Image();  
   
   // Create sprite
-  whale = WhaleSprite({
+  whale = new Whale({
     context: canvas.getContext("2d"),
     width: 4000,
     height: 200,
     image: whaleImage,
     numberOfFrames: 10,
-    ticksPerFrame: 30
+    ticksPerFrame: 10
   });
   
   // Load sprite sheet and start loop when loaded
   whaleImage.addEventListener("load", gameLoop);
   whaleImage.src = "images/whale-sprite_4000x200.png";
+  
+  var waveBackImage = new Image();
+  waveBack = new Wave({
+    context: canvas.getContext("2d"),
+    width: 400,
+    height: 180,
+    x: 0,
+    y: 20,
+    image: waveBackImage,
+    horizontalSteps: 307,
+    verticalSteps: 103,
+    horizontalMoveRange: 20,
+    verticalMoveRange: 6
+  })
+  waveBackImage.src = "images/waves_back.png";
+
+  var waveFrontImage = new Image();
+  waveFront = new Wave({
+    context: canvas.getContext("2d"),
+    width: 400,
+    height: 180,
+    x: 0,
+    y: 20,
+    image: waveFrontImage,
+    horizontalSteps: 241,
+    verticalSteps: 127,
+    horizontalMoveRange: 30,
+    verticalMoveRange: 4
+  })
+  waveFrontImage.src = "images/waves_front.png";
 
   canvas.addEventListener("touchmove", handleTouchMove);
   canvas.addEventListener("mousemove", handleTouchMove);
