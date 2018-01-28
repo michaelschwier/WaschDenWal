@@ -30,6 +30,59 @@
 
 
 (function() {
+  // ----- Global constants -------------------------------
+  const questions = [
+    {
+      q: "Ist der Wal ein Fisch oder ein S&auml;ugetier?",
+      c: "S&auml;ugetier",
+      w: "Fisch"
+    },
+    {
+      q: "Muss ein Wal auftauchen und Luft holen oder kann er einfach  weiterschwimmen?",
+      c: "Auftauchen",
+      w: "Weiterschwimmen"
+    },
+    {
+      q: "Ein Blauwal kann bis zu 150 Tonnen schwer werden, das ist so viel wie 150 Autos wiegen, und ist damit das schwerste Tier auf der Erde. Stimmt das?",
+      c: "Stimmt voll, du Landratte!",
+      w: "So ein Quallenquatsch!"
+    },
+    {
+      q: "Wie nennt man die Sprache der Wale?",
+      c: "Walgesang",
+      w: "Walgelaber"
+    },
+    {
+      q: "Wale k&ouml;nnen sich gegenseitig h&ouml;ren, auch wenn sie mehrere hundert Kilometer weit voneinaneinder entfernt sind. Stimmt das?",
+      c: "Das ist doch so klar wie Klabautermannrotze!",
+      w: "Die haben doch gar keine Ohren"
+    },
+    {
+      q: "Die Schwanzflosse eines Wals nennt man auch: ",
+      c: "Fluke",
+      w: "Walfischantriebspaddeldingsbums"
+    },
+    {
+      q: "Die sogenannten Bartenwale essen am liebsten: ",
+      c: "Plankton und Krill",
+      w: "Pommes und Nudeln"
+    },
+    {
+      q: "Welche zwei Arten von Walen gibt es?",
+      c: "Bartwale und Zahnwale",
+      w: "Spektralwale und Farbwale"
+    },
+    {
+      q: "Den Spitznamen &bdquo;Einhorn des Meeres&ldquo; tr&auml;gt der Narwal, weil er so einen gro&szlig;en Sto&szlig;zahn hat. ",
+      c: "Aber klar, du Leichtmatrose!",
+      w: "Erz&auml;hl doch keinen Makrelenmurks! "
+    },
+    {
+      q: "Welche Tiere gelten als die n&auml;chsten lebenden Verwandten der Wale?",
+      c: "Flusspferde",
+      w: "Pudel"
+    },
+  ]
   
   // ----- Global variables -------------------------------
   var resources;
@@ -37,6 +90,7 @@
   var waveFront;
   var waveBack;
   var canvas;
+  var gamestate;
   
   // --------------------------------------------------------------------------
   function ResourcePreLoader()
@@ -153,40 +207,30 @@
     
     this.isClean = false;
 
-    this.update = function(addTicks) 
+    this.update = function update(addTicks) 
     {
-      tickCount += addTicks;
-      if (tickCount > ticksPerFrame) {
-        tickCount = 0;
-        if (frameIndex < numberOfFrames - 2) {
-          frameIndex += 1;
-        } 
-        else {
-          frameIndex = 9;
-          this.isClean = true;
+      if (!this.isClean) {
+        tickCount += addTicks;
+        if (tickCount > ticksPerFrame) {
+          tickCount = 0;
+          if (frameIndex < numberOfFrames - 2) {
+            frameIndex += 1;
+          } 
+          else {
+            frameIndex = 9;
+            this.isClean = true;
+          }
         }
+        this.clipX = frameIndex * this.width;
       }
     };
 
     this.reset = function()
     {
-      frameIndex = 0;
       this.isClean = false;
+      frameIndex = 0;
+      this.update(0);
     }
-
-    this.render = function() 
-    {
-      this.context.drawImage(
-        this.image,
-        frameIndex * this.width / numberOfFrames,
-        0,
-        this.width / numberOfFrames,
-        this.height,
-        this.x,
-        this.y,
-        this.width / numberOfFrames,
-        this.height);
-    };
   }
 
   // --------------------------------------------------------------------------
@@ -197,13 +241,51 @@
 
   function handleMouseDown(e)
   {
-    if (whale.isClean) {
-      whale.reset();
+  }
+
+  function handleCorrectAnswer()
+  {
+    const quizContainer = document.getElementById("quizContainer");
+    var htmlOutput = []
+    htmlOutput.push(`<p>Voll richtig! Wasch den Wal nochmal!</p>`);
+    quizContainer.innerHTML = htmlOutput.join("");
+    whale.reset();
+    gamestate = 1;
+  }
+
+  function handleWrongAnswer()
+  {
+    const quizContainer = document.getElementById("quizContainer");
+    var htmlOutput = []
+    htmlOutput.push(`<p>Oh nein, die Antwort war leider falsch! Wasch den Wal nochmal!</p>`);
+    quizContainer.innerHTML = htmlOutput.join("");
+    whale.reset();
+    gamestate = 1;  }
+
+  // --------------------------------------------------------------------------
+  function showQuestion()
+  {
+    const quizContainer = document.getElementById("quizContainer");
+    var htmlOutput = []
+    questionIndex = Math.floor(Math.random() * questions.length);
+    currQuestion = questions[questionIndex]
+    htmlOutput.push(`<p>Yay der Wal ist sauber und gl&uuml;cklich!</p>`);
+    htmlOutput.push(`<p>${currQuestion.q}</p>`);
+    if (Math.random() < 0.5) {
+      htmlOutput.push(`<p><button id="correct">${currQuestion.c}</button></p>`);
+      htmlOutput.push(`<p><button id="wrong">${currQuestion.w}</button></p>`);
     }
+    else {
+      htmlOutput.push(`<p><button id="wrong">${currQuestion.w}</button></p>`);      
+      htmlOutput.push(`<p><button id="correct">${currQuestion.c}</button></p>`);
+    }
+    quizContainer.innerHTML = htmlOutput.join("");
+    document.getElementById("correct").addEventListener("click", handleCorrectAnswer);
+    document.getElementById("wrong").addEventListener("click", handleWrongAnswer);    
   }
 
   // --------------------------------------------------------------------------
-  function gameLoop () 
+  function gameLoop() 
   {
     window.requestAnimationFrame(gameLoop);
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
@@ -214,6 +296,13 @@
     waveBack.render();
     whale.render();
     waveFront.render();
+
+    if (gamestate == 1) {
+      if (whale.isClean) {
+        gamestate = 2;
+        showQuestion();
+      }
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -224,14 +313,14 @@
     canvas.width = 400;
     canvas.height = 200;
     
-    // Create sprite
+    // Create fame objects
     whale = new Whale({
       context: canvas.getContext("2d"),
-      width: 4000,
+      width: 400,
       height: 200,
       image: resources.getImage("whale"),
       numberOfFrames: 10,
-      ticksPerFrame: 10
+      ticksPerFrame: 2
     });
     
     waveBack = new Wave({
@@ -264,6 +353,7 @@
     canvas.addEventListener("mousemove", handleTouchMove);
     canvas.addEventListener("mousedown", handleMouseDown);
 
+    gamestate = 1;
     gameLoop();
   }
 
