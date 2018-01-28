@@ -30,60 +30,6 @@
 
 
 (function() {
-  // ----- Global constants -------------------------------
-  const questions = [
-    {
-      q: "Ist der Wal ein Fisch oder ein S&auml;ugetier?",
-      c: "S&auml;ugetier",
-      w: "Fisch"
-    },
-    {
-      q: "Muss ein Wal auftauchen und Luft holen oder kann er einfach  weiterschwimmen?",
-      c: "Auftauchen",
-      w: "Weiterschwimmen"
-    },
-    {
-      q: "Ein Blauwal kann bis zu 150 Tonnen schwer werden, das ist so viel wie 150 Autos wiegen, und ist damit das schwerste Tier auf der Erde. Stimmt das?",
-      c: "Stimmt voll, du Landratte!",
-      w: "So ein Quallenquatsch!"
-    },
-    {
-      q: "Wie nennt man die Sprache der Wale?",
-      c: "Walgesang",
-      w: "Walgelaber"
-    },
-    {
-      q: "Wale k&ouml;nnen sich gegenseitig h&ouml;ren, auch wenn sie mehrere hundert Kilometer weit voneinaneinder entfernt sind. Stimmt das?",
-      c: "Das ist doch so klar wie Klabautermannrotze!",
-      w: "Die haben doch gar keine Ohren"
-    },
-    {
-      q: "Die Schwanzflosse eines Wals nennt man auch: ",
-      c: "Fluke",
-      w: "Walfischantriebspaddeldingsbums"
-    },
-    {
-      q: "Die sogenannten Bartenwale essen am liebsten: ",
-      c: "Plankton und Krill",
-      w: "Pommes und Nudeln"
-    },
-    {
-      q: "Welche zwei Arten von Walen gibt es?",
-      c: "Bartwale und Zahnwale",
-      w: "Spektralwale und Farbwale"
-    },
-    {
-      q: "Den Spitznamen &bdquo;Einhorn des Meeres&ldquo; tr&auml;gt der Narwal, weil er so einen gro&szlig;en Sto&szlig;zahn hat. ",
-      c: "Aber klar, du Leichtmatrose!",
-      w: "Erz&auml;hl doch keinen Makrelenmurks! "
-    },
-    {
-      q: "Welche Tiere gelten als die n&auml;chsten lebenden Verwandten der Wale?",
-      c: "Flusspferde",
-      w: "Pudel"
-    },
-  ]
-  
   // ----- Global variables -------------------------------
   var resources;
   var whale;
@@ -91,6 +37,95 @@
   var waveBack;
   var canvas;
   var gamestate;
+  var questionServer;
+
+  // --------------------------------------------------------------------------
+  //! Serves questions in a random order but makes sure no question is 
+  //! repeated before all others have been shown.
+  function RandomQuestionServer()
+  {  
+    const questions = [
+      {
+        q: "Ist der Wal ein Fisch oder ein S&auml;ugetier?",
+        c: "S&auml;ugetier",
+        w: "Fisch"
+      },
+      {
+        q: "Muss ein Wal auftauchen und Luft holen oder kann er einfach  weiterschwimmen?",
+        c: "Auftauchen",
+        w: "Weiterschwimmen"
+      },
+      {
+        q: "Ein Blauwal kann bis zu 150 Tonnen schwer werden, das ist so viel wie 150 Autos wiegen, und ist damit das schwerste Tier auf der Erde. Stimmt das?",
+        c: "Stimmt voll, du Landratte!",
+        w: "So ein Quallenquatsch!"
+      },
+      {
+        q: "Wie nennt man die Sprache der Wale?",
+        c: "Walgesang",
+        w: "Walgelaber"
+      },
+      {
+        q: "Wale k&ouml;nnen sich gegenseitig h&ouml;ren, auch wenn sie mehrere hundert Kilometer weit voneinaneinder entfernt sind. Stimmt das?",
+        c: "Das ist doch so klar wie Klabautermannrotze!",
+        w: "Die haben doch gar keine Ohren"
+      },
+      {
+        q: "Die Schwanzflosse eines Wals nennt man auch: ",
+        c: "Fluke",
+        w: "Walfischantriebspaddeldingsbums"
+      },
+      {
+        q: "Die sogenannten Bartenwale essen am liebsten: ",
+        c: "Plankton und Krill",
+        w: "Pommes und Nudeln"
+      },
+      {
+        q: "Welche zwei Arten von Walen gibt es?",
+        c: "Bartwale und Zahnwale",
+        w: "Spektralwale und Farbwale"
+      },
+      {
+        q: "Den Spitznamen &bdquo;Einhorn des Meeres&ldquo; tr&auml;gt der Narwal, weil er so einen gro&szlig;en Sto&szlig;zahn hat. ",
+        c: "Aber klar, du Leichtmatrose!",
+        w: "Erz&auml;hl doch keinen Makrelenmurks! "
+      },
+      {
+        q: "Welche Tiere gelten als die n&auml;chsten lebenden Verwandten der Wale?",
+        c: "Flusspferde",
+        w: "Pudel"
+      },
+    ]
+    var questionSelectIndex = questions.length;
+    var questionIndexList = [];
+
+    function createShuffledIndexList()
+    {
+      questionIndexList = [];
+      for (var n = 0; n < questions.length; n++) {
+        questionIndexList.push(n);
+        var j, x, i;
+        for (i = questionIndexList.length - 1; i > 0; i--) {
+          j = Math.floor(Math.random() * (i + 1));
+          x = questionIndexList[i];
+          questionIndexList[i] = questionIndexList[j];
+          questionIndexList[j] = x;
+        }
+      }
+    }
+
+    this.getNextQuestion = function()
+    {
+      if (questionSelectIndex >= questions.length) {
+        createShuffledIndexList();
+        questionSelectIndex = 0;
+      }
+      question = questions[questionIndexList[questionSelectIndex]];
+      questionSelectIndex += 1;
+      return question;
+    }
+  }
+  
   
   // --------------------------------------------------------------------------
   function ResourcePreLoader()
@@ -267,8 +302,7 @@
   {
     const quizContainer = document.getElementById("quizContainer");
     var htmlOutput = []
-    questionIndex = Math.floor(Math.random() * questions.length);
-    currQuestion = questions[questionIndex]
+    currQuestion = questionServer.getNextQuestion();
     htmlOutput.push(`<p>Yay der Wal ist sauber und gl&uuml;cklich!</p>`);
     htmlOutput.push(`<p>${currQuestion.q}</p>`);
     if (Math.random() < 0.5) {
@@ -354,6 +388,7 @@
     canvas.addEventListener("mousedown", handleMouseDown);
 
     gamestate = 1;
+    questionServer = new RandomQuestionServer();
     gameLoop();
   }
 
