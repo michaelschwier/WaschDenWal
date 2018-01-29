@@ -172,7 +172,7 @@
   }
   
   // --------------------------------------------------------------------------
-  function Wave(options)
+  function SinusAnimationSprite(options)
   {
     SpriteBase.call(this, options)
 
@@ -200,7 +200,7 @@
   
   
   // --------------------------------------------------------------------------
-  function Whale(options)
+  function MultiFrameSprite(options)
   {
     SpriteBase.call(this, options)
 
@@ -209,11 +209,12 @@
     var ticksPerFrame = options.ticksPerFrame || 0;
     var numberOfFrames = options.numberOfFrames || 1;
     
-    this.isClean = false;
+    //this.isAutoRepeating = options.autoRepeat || false;
+    this.isAtLastFrame = false;
 
     this.update = function update(addTicks) 
     {
-      if (!this.isClean) {
+      if (!this.isAtLastFrame) {
         tickCount += addTicks;
         if (tickCount > ticksPerFrame) {
           tickCount = 0;
@@ -221,8 +222,8 @@
             frameIndex += 1;
           } 
           else {
-            frameIndex = 9;
-            this.isClean = true;
+            frameIndex = numberOfFrames - 1;
+            this.isAtLastFrame = true;
           }
         }
         this.clipX = frameIndex * this.width;
@@ -231,12 +232,42 @@
 
     this.reset = function()
     {
-      this.isClean = false;
+      this.isAtLastFrame = false;
       frameIndex = 0;
       this.update(0);
     }
   }
 
+  // --------------------------------------------------------------------------
+  function Whale(options)
+  {
+    this.whaleSprite = options.whaleSprite;
+    this.overlaySprite = options.overlaySprite;
+    
+    this.update = function update(addTicks)
+    {
+      this.whaleSprite.update(addTicks);
+      this.overlaySprite.update(addTicks);
+    }
+
+    this.render = function()
+    {
+      this.whaleSprite.render();
+      this.overlaySprite.render();
+    }
+
+    this.reset = function()
+    {
+      this.whaleSprite.reset();
+      this.overlaySprite.reset();
+    }
+
+    this.isClean = function()
+    {
+      return this.whaleSprite.isAtLastFrame;
+    }
+  }
+  
   // --------------------------------------------------------------------------
   function handleTouchMove(e)
   {
@@ -301,7 +332,7 @@
     waveFront.render();
 
     if (gamestate == 1) {
-      if (whale.isClean) {
+      if (whale.isClean()) {
         gamestate = 2;
         showQuestion();
       }
@@ -313,25 +344,48 @@
   {
     // Get canvas
     canvas = document.getElementById("gameCanvas");
-    canvas.width = 400;
-    canvas.height = 200;
+    canvas.width = 600;
+    canvas.height = 600;
     
-    // Create fame objects
-    whale = new Whale({
+    // Create sprites
+    whaleSprite = new MultiFrameSprite({
       context: canvas.getContext("2d"),
-      width: 400,
-      height: 200,
+      width: 600,
+      height: 600,
       image: resources.getImage("whale"),
-      numberOfFrames: 10,
-      ticksPerFrame: 2
+      numberOfFrames: 12,
+      ticksPerFrame: 5
+    });
+
+    dirtSprite = new MultiFrameSprite({
+      context: canvas.getContext("2d"),
+      width: 600,
+      height: 600,
+      image: resources.getImage("dirt"),
+      numberOfFrames: 12,
+      ticksPerFrame: 5
+    });
+
+    shampooSprite = new MultiFrameSprite({
+      context: canvas.getContext("2d"),
+      width: 600,
+      height: 600,
+      image: resources.getImage("shampoo"),
+      numberOfFrames: 9,
+      ticksPerFrame: 5
+    });
+
+    whale = new Whale({
+      whaleSprite: whaleSprite,
+      overlaySprite: dirtSprite
     });
     
-    waveBack = new Wave({
+    waveBack = new SinusAnimationSprite({
       context: canvas.getContext("2d"),
-      width: 400,
-      height: 180,
+      width: 600,
+      height: 250,
       x: 0,
-      y: 20,
+      y: 240,
       image: resources.getImage("waveBack"),
       horizontalSteps: 433,
       verticalSteps: 123,
@@ -339,12 +393,12 @@
       verticalMoveRange: 6
     })
 
-    waveFront = new Wave({
+    waveFront = new SinusAnimationSprite({
       context: canvas.getContext("2d"),
-      width: 400,
-      height: 180,
+      width: 600,
+      height: 250,
       x: 0,
-      y: 20,
+      y: 360,
       image: resources.getImage("waveFront"),
       horizontalSteps: 387,
       verticalSteps: 103,
@@ -365,9 +419,11 @@
   // START
   // --------------------------------------------------------------------------
   resources = new ResourcePreLoader();
-  resources.addImage("waveBack", "images/waves_back.png");
-  resources.addImage("waveFront", "images/waves_front.png");
-  resources.addImage("whale", "images/whale-sprite_4000x200.png");
+  resources.addImage("waveBack", "images/waves-back_700x250.png");
+  resources.addImage("waveFront", "images/waves-front_700x250.png");
+  resources.addImage("whale", "images/whale-sprite_600x600x12.png");
+  resources.addImage("dirt", "images/dirt-sprite_600x600x12.png");
+  resources.addImage("shampoo", "images/shampoo-sprite_600x600x9.png");
   resources.loadAndCallWhenDone(initGame);
 } ());
 
