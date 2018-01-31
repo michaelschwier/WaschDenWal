@@ -1,7 +1,7 @@
 #gameContainer {
 	position: relative;
 	background-color: black;
-	background-image: url("images/background.png");
+	background-image: url("../images/background.png");
 	background-size: cover;
 	width: 600px;
 	height: 600px;
