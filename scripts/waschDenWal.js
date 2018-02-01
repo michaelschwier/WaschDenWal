@@ -233,7 +233,7 @@
       if (delayUntilGame == 0) {
         document.getElementById("gameContainer").style.backgroundImage="url(images/background.png)"; 
         const quizContainer = document.getElementById("quizContainer");
-        quizContainer.innerHTML = `<p>Schrubbe kr&auml;ftig mit dem Finger oder der Maus &uuml;ber den Wal um ihn zu waschen!</p>`;
+        quizContainer.innerHTML = `<p>Schrubbe kr&auml;ftig mit dem Finger oder der Maus &uuml;ber den Wal, um ihn zu waschen!</p>`;
       }
     }
 
@@ -450,7 +450,7 @@
         htmlOutput.push(`<p>Voll richtig! Wasch den Wal nochmal!</p>`);
       }
       else {
-        htmlOutput.push(`<p>3x richtig! Wasch den Wal mit Shampoo!</p>`);        
+        htmlOutput.push(`<p>Du hast 3x richtig geantwortet! Wasch den Wal mit Shampoo!</p>`);        
       }
       quizContainer.innerHTML = htmlOutput.join("");
       finished = true;
@@ -471,7 +471,7 @@
       const quizContainer = document.getElementById("quizContainer");
       var htmlOutput = []
       currQuestion = questionServer.getNextQuestion();
-      htmlOutput.push(`<p>Yay der Wal ist sauber und gl&uuml;cklich!</p>`);
+      htmlOutput.push(`<p>Yay, der Wal ist sauber und gl&uuml;cklich!</p>`);
       htmlOutput.push(`<p>${currQuestion.q}</p>`);
       if (Math.random() < 0.5) {
         htmlOutput.push(`<p><button id="correct">${currQuestion.c}</button></p>`);
