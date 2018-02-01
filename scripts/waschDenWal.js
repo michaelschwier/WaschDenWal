@@ -71,13 +71,13 @@
       questionIndexList = [];
       for (var n = 0; n < questions.length; n++) {
         questionIndexList.push(n);
-        var j, x, i;
-        for (i = questionIndexList.length - 1; i > 0; i--) {
-          j = Math.floor(Math.random() * (i + 1));
-          x = questionIndexList[i];
-          questionIndexList[i] = questionIndexList[j];
-          questionIndexList[j] = x;
-        }
+      }
+      var j, x, i;
+      for (i = questionIndexList.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = questionIndexList[i];
+        questionIndexList[i] = questionIndexList[j];
+        questionIndexList[j] = x;
       }
     }
 
