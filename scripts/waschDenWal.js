@@ -450,7 +450,7 @@
         htmlOutput.push(`<p>Voll richtig! Wasch den Wal nochmal!</p>`);
       }
       else {
-        htmlOutput.push(`<p>Du hast 3x richtig geantwortet! Wasch den Wal mit Shampoo!</p>`);        
+        htmlOutput.push(`<p>Du hast 3x hintereinander richtig geantwortet! Wasch den Wal mit Shampoo!</p>`);        
       }
       quizContainer.innerHTML = htmlOutput.join("");
       finished = true;
