@@ -342,7 +342,7 @@
   {
     GamePhase.call(this, scene);
     var chachedScene = scene;
-    var sceneEndCountdown = 60;
+    var sceneEndCountdown = 80;
     this.shampoAnimation = new MultiFrameAnimatedSprite({
       context: canvas.getContext("2d"),
       width: 600,
