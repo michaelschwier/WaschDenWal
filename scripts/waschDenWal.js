@@ -209,7 +209,83 @@
   }
   
   // --------------------------------------------------------------------------
-  function GamePhase(scene) {
+  function IntroPhase(titleDelay = 100) {
+    var delayUntilTitle = titleDelay;
+    var delayUntilGame = 100 + delayUntilTitle;
+    const quizContainer = document.getElementById("quizContainer");
+    quizContainer.innerHTML = "";
+    playerScore = 0;
+
+    this.handleMouseMove = function()
+    { }
+
+    this.update = function()
+    {
+      delayUntilTitle -= 1;
+      delayUntilGame -= 1;
+    }
+
+    this.render = function()
+    {
+      if (delayUntilTitle == 0) {
+        document.getElementById("gameContainer").style.backgroundImage="url(images/title-02.png)";
+      }
+      if (delayUntilGame == 0) {
+        document.getElementById("gameContainer").style.backgroundImage="url(images/background.png)"; 
+        const quizContainer = document.getElementById("quizContainer");
+        quizContainer.innerHTML = `<p>Schrubbe kr&auml;ftig mit dem Finger oder der Maus &uuml;ber den Wal um ihn zu waschen!</p>`;
+      }
+    }
+
+    this.getNextGamePhase = function()
+    {
+      if (delayUntilGame < 0) 
+      {
+        var whale = new Whale({
+          scrubsPerDirtLevel: 10
+        });
+        
+        var waveBack = new SinusAnimationSprite({
+          context: canvas.getContext("2d"),
+          width: 600,
+          height: 250,
+          x: 0,
+          y: 240,
+          image: resources.getImage("waveBack"),
+          horizontalSteps: 433,
+          verticalSteps: 123,
+          horizontalMoveRange: 20,
+          verticalMoveRange: 6
+        });
+    
+        var waveFront = new SinusAnimationSprite({
+          context: canvas.getContext("2d"),
+          width: 600,
+          height: 250,
+          x: 0,
+          y: 360,
+          image: resources.getImage("waveFront"),
+          horizontalSteps: 387,
+          verticalSteps: 103,
+          horizontalMoveRange: 30,
+          verticalMoveRange: 4
+        });
+    
+        return new WashPhase({
+          backGround: waveBack,
+          foreGround: waveFront,
+          whale: whale
+        });
+      }
+      else {
+        return this;
+      }
+    }
+  }
+  
+  // --------------------------------------------------------------------------
+  function GamePhase(scene) 
+  {
     this.backGround = scene.backGround;
     this.foreGround = scene.foreGround;
     this.whale = scene.whale;
@@ -238,7 +314,8 @@
   }
   
   // --------------------------------------------------------------------------
-  function WashPhase(scene) {
+  function WashPhase(scene) 
+  {
     GamePhase.call(this, scene);
     var chachedScene = scene;
     this.whale.reset();
@@ -251,7 +328,7 @@
     this.getNextGamePhase = function()
     {
       if (this.whale.isClean()) {
-        followUpGamePhase = new QuestionPhase(chachedScene);
+        var followUpGamePhase = new QuestionPhase(chachedScene);
         return new IdlePhase(chachedScene, 30, followUpGamePhase);
       }
       else {
@@ -261,9 +338,54 @@
   }
 
   // --------------------------------------------------------------------------
-  function WashPhaseDeluxe(scene) {
+  function WashPhaseDeluxeIntro(scene)
+  {
     GamePhase.call(this, scene);
-    //var chachedScene = scene;
+    var chachedScene = scene;
+    var sceneEndCountdown = 60;
+    this.shampoAnimation = new MultiFrameAnimatedSprite({
+      context: canvas.getContext("2d"),
+      width: 600,
+      height: 600,
+      image: resources.getImage("shampooBottle"),
+      numberOfFrames: 11,
+      updateRate: 10
+    });
+    this.shampoAnimation.play();
+
+    this.super_update = this.update;
+    this.update = function()
+    {
+      if (this.shampoAnimation.getCurrentFrameIdx() >= this.shampoAnimation.getNumberOfFrames() - 1) {
+        sceneEndCountdown -= 1;
+      }
+      this.super_update();
+      this.shampoAnimation.update();
+    }
+
+    this.super_render = this.render;
+    this.render = function()
+    {
+      this.super_render();
+      this.shampoAnimation.render();
+    }
+
+    this.getNextGamePhase = function()
+    {
+      if (sceneEndCountdown <= 0) {
+        return new WashPhaseDeluxe(chachedScene);
+      }
+      else {
+        return this;
+      }
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  function WashPhaseDeluxe(scene) 
+  {
+    GamePhase.call(this, scene);
+    var chachedScene = scene;
     this.whale = new ShampooWhale({
       scrubsPerDirtLevel: 10
     });
@@ -275,12 +397,19 @@
 
     this.getNextGamePhase = function()
     {
-      return this;
+      if (this.whale.isClean()) {
+        var followUpGamePhase = new IntroPhase(1);
+        return new IdlePhase(chachedScene, 200, followUpGamePhase);
+      }
+      else {
+        return this;
+      }
     }
   }
 
   // --------------------------------------------------------------------------
-  function IdlePhase(scene, idleDuration, followingGamePhase) {
+  function IdlePhase(scene, idleDuration, followingGamePhase) 
+  {
     GamePhase.call(this, scene);
     var chachedScene = scene;
     var idleTimeLeft = idleDuration;
@@ -305,7 +434,8 @@
   }
   
   // --------------------------------------------------------------------------
-  function QuestionPhase(scene) {
+  function QuestionPhase(scene) 
+  {
     GamePhase.call(this, scene);
     var cachedScene = scene;
     var questionShown = false;
@@ -373,7 +503,7 @@
           return new WashPhase(cachedScene);
         }
         else {
-          return new WashPhaseDeluxe(cachedScene);
+          return new WashPhaseDeluxeIntro(cachedScene);
         }
       }
       else {
@@ -400,42 +530,8 @@
     canvas.width = 600;
     canvas.height = 600;
     
-    var whale = new Whale({
-      scrubsPerDirtLevel: 10
-    });
-    
-    var waveBack = new SinusAnimationSprite({
-      context: canvas.getContext("2d"),
-      width: 600,
-      height: 250,
-      x: 0,
-      y: 240,
-      image: resources.getImage("waveBack"),
-      horizontalSteps: 433,
-      verticalSteps: 123,
-      horizontalMoveRange: 20,
-      verticalMoveRange: 6
-    });
-
-    var waveFront = new SinusAnimationSprite({
-      context: canvas.getContext("2d"),
-      width: 600,
-      height: 250,
-      x: 0,
-      y: 360,
-      image: resources.getImage("waveFront"),
-      horizontalSteps: 387,
-      verticalSteps: 103,
-      horizontalMoveRange: 30,
-      verticalMoveRange: 4
-    });
-
     questionServer = new RandomQuestionServer();
-    gamePhase = new WashPhase({
-      backGround: waveBack,
-      foreGround: waveFront,
-      whale: whale
-    });
+    gamePhase = new IntroPhase();
     canvas.addEventListener("touchmove", handleMouseMove);
     canvas.addEventListener("mousemove", handleMouseMove);
     gameLoop();
@@ -450,6 +546,7 @@
   resources.addImage("whale", "images/whale-sprite_600x600x12.png");
   resources.addImage("dirt", "images/dirt-sprite_600x600x12.png");
   resources.addImage("shampoo", "images/shampoo-sprite_600x600x9.png");
+  resources.addImage("shampooBottle", "images/shampoo-bottle_600x600x11.png");
   resources.loadAndCallWhenDone(initGame);
 } ());
 

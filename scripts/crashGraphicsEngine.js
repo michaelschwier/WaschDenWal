@@ -105,38 +105,84 @@ function MultiFrameSprite(options)
 {
   SpriteBase.call(this, options)
 
-  var frameIndex = 0;
-  var numberOfFrames = options.numberOfFrames || 1;
+  this.frameIndex = 0;
+  this.numberOfFrames = options.numberOfFrames || 1;
 
   this.getNumberOfFrames = function()
   {
-    return numberOfFrames;
+    return this.numberOfFrames;
   }
 
   this.setCurrentFrameIdx = function(newFrameIndex)
   {
-    frameIndex = Math.min((numberOfFrames - 1), Math.max(0, newFrameIndex));
+    this.frameIndex = Math.min((this.numberOfFrames - 1), Math.max(0, newFrameIndex));
   }
 
   this.increaseCurrentFrameIdxBy = function(step)
   {
-    this.setCurrentFrameIdx(frameIndex + step)
+    this.setCurrentFrameIdx(this.frameIndex + step)
   }
 
   this.getCurrentFrameIdx = function()
   {
-    return frameIndex;
+    return this.frameIndex;
   }
 
   this.update = function() 
   { 
-    this.clipX = frameIndex * this.width;
+    this.clipX = this.frameIndex * this.width;
   }
 
   this.reset = function()
   {
-    frameIndex = 0;
+    this.frameIndex = 0;
     this.update();
   }
 }
 
+// --------------------------------------------------------------------------
+function MultiFrameAnimatedSprite(options)
+{
+  MultiFrameSprite.call(this, options);
+
+  this.isPlaying = false;
+  this.autoRepeat = false;
+  this.updateRate = options.updateRate || 1;
+  this.currTickCount = 0;
+
+  this.play = function() 
+  {
+    this.isPlaying = true;
+  }
+
+  this.playLoop = function() 
+  {
+    this.isPlaying = true;
+    this.autoRepeat = true;
+  }
+
+  this.stop = function()
+  {
+    this.isPlaying = false;
+    this.autoRepeat = false;
+  }
+
+  this.super_update = this.update;
+  this.update = function()
+  {
+    this.currTickCount += 1;
+    if (this.currTickCount >= this.updateRate) {
+      this.currTickCount = 0;
+      if (this.frameIndex < this.numberOfFrames - 1) {
+        this.increaseCurrentFrameIdxBy(1);
+      }
+      else if (this.autoRepeat) {
+        this.frameIndex = 0;
+      }
+      else {
+        this.stop();
+      }
+    }
+    this.super_update();
+  }
+}
