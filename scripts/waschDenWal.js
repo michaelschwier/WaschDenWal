@@ -511,12 +511,31 @@
       }
     }
   }
+    
+  // --------------------------------------------------------------------------
+  function adjustCanvasSize()
+  {
+    var gameContainer = document.getElementById("gameContainer");
+    var newSize = Math.min(gameContainer.offsetWidth, gameContainer.offsetHeight);
+    var currSize = Math.min(canvas.width, canvas.height);
+
+    if (newSize != currSize) {
+      //console.log(gameContainer.offsetWidth, gameContainer.offsetHeight, canvas.width, canvas.height);
+      canvas.width = newSize;
+      canvas.height = newSize;
+      newRelSize = newSize / 600.0;
+      canvas.getContext("2d").setTransform(newRelSize, 0, 0, newRelSize, 0, 0);
+      //console.log(gameContainer.offsetWidth, gameContainer.offsetHeight, canvas.width, canvas.height);
+      //console.log("-------------------")
+      }
+  }
   
   // --------------------------------------------------------------------------
   function gameLoop() 
   {
     window.requestAnimationFrame(gameLoop);
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    adjustCanvasSize();
+    canvas.getContext("2d").clearRect(0, 0, 600, 600);
 
     gamePhase.update();
     gamePhase.render();
@@ -527,11 +546,10 @@
   function initGame()
   {
     canvas = document.getElementById("gameCanvas");
-    canvas.width = 600;
-    canvas.height = 600;
-    
+    adjustCanvasSize();
     questionServer = new RandomQuestionServer();
     gamePhase = new IntroPhase();
+
     canvas.addEventListener("touchmove", handleMouseMove);
     canvas.addEventListener("mousemove", handleMouseMove);
     gameLoop();

@@ -130,7 +130,7 @@ function MultiFrameSprite(options)
 
   this.update = function() 
   { 
-    this.clipX = this.frameIndex * this.width;
+    this.clipX = this.frameIndex * this.clipWidth;
   }
 
   this.reset = function()
