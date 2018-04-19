@@ -5,64 +5,117 @@
   var gamePhase;
   var questionServer;
   var playerScore = 0;
+  var gLanguage = "de"
 
+  // --------------------------------------------------------------------------
+  //! Translation functionality, very simple
+    const translations = {
+      de: {
+        "Scrub the whale with your finger or the mouse to wash it!":
+        "Schrubbe kr&auml;ftig mit dem Finger oder der Maus &uuml;ber den Wal, um ihn zu waschen!",
+
+        "Correct! Wash the whale again!":
+        "Voll richtig! Wasch den Wal nochmal!",
+
+        "You answered correctly 3x in a row! Wash the whale with shampoo!":
+        "Du hast 3x hintereinander richtig geantwortet! Wasch den Wal mit Shampoo!",
+
+        "Oh no, the answer was wrong! Wash the whale again!":
+        "Oh nein, die Antwort war leider falsch! Wasch den Wal nochmal!",
+
+        "Yay, the whale is clean and happy!":
+        "Yay, der Wal ist sauber und gl&uuml;cklich!"
+      }
+    };
+
+  function tr(text)
+  {
+    if ((gLanguage in translations) && (text in translations[gLanguage])) {
+      return translations[gLanguage][text];
+    }
+    else {
+      return text;
+    }
+  }
+  
+  
   // --------------------------------------------------------------------------
   //! Serves questions in a random order but makes sure no question is 
   //! repeated before all others have been shown.
-  function RandomQuestionServer()
+  function RandomQuestionServer(language)
   {  
-    const questions = [
-      {
-        q: "Ist der Wal ein Fisch oder ein S&auml;ugetier?",
-        c: "S&auml;ugetier",
-        w: "Fisch"
-      },
-      {
-        q: "Muss ein Wal auftauchen und Luft holen oder kann er einfach  weiterschwimmen?",
-        c: "Auftauchen",
-        w: "Weiterschwimmen"
-      },
-      {
-        q: "Ein Blauwal kann bis zu 150 Tonnen schwer werden, das ist so viel wie 150 Autos wiegen, und ist damit das schwerste Tier auf der Erde. Stimmt das?",
-        c: "Stimmt voll, du Landratte!",
-        w: "So ein Quallenquatsch!"
-      },
-      {
-        q: "Wie nennt man die Sprache der Wale?",
-        c: "Walgesang",
-        w: "Walgelaber"
-      },
-      {
-        q: "Wale k&ouml;nnen sich gegenseitig h&ouml;ren, auch wenn sie mehrere hundert Kilometer weit voneinaneinder entfernt sind. Stimmt das?",
-        c: "Das ist doch so klar wie Klabautermannrotze!",
-        w: "Die haben doch gar keine Ohren"
-      },
-      {
-        q: "Die Schwanzflosse eines Wals nennt man auch: ",
-        c: "Fluke",
-        w: "Walfischantriebspaddeldingsbums"
-      },
-      {
-        q: "Die sogenannten Bartenwale essen am liebsten: ",
-        c: "Plankton und Krill",
-        w: "Pommes und Nudeln"
-      },
-      {
-        q: "Welche zwei Arten von Walen gibt es?",
-        c: "Bartwale und Zahnwale",
-        w: "Spektralwale und Farbwale"
-      },
-      {
-        q: "Den Spitznamen &bdquo;Einhorn des Meeres&ldquo; tr&auml;gt der Narwal, weil er so einen gro&szlig;en Sto&szlig;zahn hat. ",
-        c: "Aber klar, du Leichtmatrose!",
-        w: "Erz&auml;hl doch keinen Makrelenmurks! "
-      },
-      {
-        q: "Welche Tiere gelten als die n&auml;chsten lebenden Verwandten der Wale?",
-        c: "Flusspferde",
-        w: "Pudel"
-      },
-    ]
+    const questionsMultilingual = {
+      de: [
+        {
+          q: "Ist der Wal ein Fisch oder ein S&auml;ugetier?",
+          c: "S&auml;ugetier",
+          w: "Fisch"
+        },
+        {
+          q: "Muss ein Wal auftauchen und Luft holen oder kann er einfach weiterschwimmen?",
+          c: "Auftauchen",
+          w: "Weiterschwimmen"
+        },
+        {
+          q: "Ein Blauwal kann bis zu 150 Tonnen schwer werden, das ist so viel wie 150 Autos wiegen, und ist damit das schwerste Tier auf der Erde. Stimmt das?",
+          c: "Stimmt voll, du Landratte!",
+          w: "So ein Quallenquatsch!"
+        },
+        {
+          q: "Wie nennt man die Sprache der Wale?",
+          c: "Walgesang",
+          w: "Walgelaber"
+        },
+        {
+          q: "Wale k&ouml;nnen sich gegenseitig h&ouml;ren, auch wenn sie mehrere hundert Kilometer weit voneinaneinder entfernt sind. Stimmt das?",
+          c: "Das ist doch so klar wie Klabautermannrotze!",
+          w: "Die haben doch gar keine Ohren"
+        },
+        {
+          q: "Die Schwanzflosse eines Wals nennt man auch: ",
+          c: "Fluke",
+          w: "Walfischantriebspaddeldingsbums"
+        },
+        {
+          q: "Die sogenannten Bartenwale essen am liebsten: ",
+          c: "Plankton und Krill",
+          w: "Pommes und Nudeln"
+        },
+        {
+          q: "Welche zwei Arten von Walen gibt es?",
+          c: "Bartwale und Zahnwale",
+          w: "Spektralwale und Farbwale"
+        },
+        {
+          q: "Den Spitznamen &bdquo;Einhorn des Meeres&ldquo; tr&auml;gt der Narwal, weil er so einen gro&szlig;en Sto&szlig;zahn hat. ",
+          c: "Aber klar, du Leichtmatrose!",
+          w: "Erz&auml;hl doch keinen Makrelenmurks! "
+        },
+        {
+          q: "Welche Tiere gelten als die n&auml;chsten lebenden Verwandten der Wale?",
+          c: "Flusspferde",
+          w: "Pudel"
+        }
+      ],
+      en: [
+        {
+          q: "Question 1?",
+          c: "Correct Answer 1",
+          w: "Wrong Answer 1"
+        },
+        {
+          q: "Question 2?",
+          c: "Correct Answer 2",
+          w: "Wrong Answer 2"
+        },
+        {
+          q: "Question 3?",
+          c: "Correct Answer 3",
+          w: "Wrong Answer 3"
+        }
+      ]
+    };
+    const questions = questionsMultilingual[language];
     var questionSelectIndex = questions.length;
     var questionIndexList = [];
 
@@ -228,12 +281,12 @@
     this.render = function()
     {
       if (delayUntilTitle == 0) {
-        document.getElementById("gameContainer").style.backgroundImage="url(images/title-02.png)";
+        document.getElementById("gameContainer").style.backgroundImage=`url(images/${gLanguage}/title-02.png)`;
       }
       if (delayUntilGame == 0) {
         document.getElementById("gameContainer").style.backgroundImage="url(images/background.png)"; 
         const quizContainer = document.getElementById("quizContainer");
-        quizContainer.innerHTML = `<p>Schrubbe kr&auml;ftig mit dem Finger oder der Maus &uuml;ber den Wal, um ihn zu waschen!</p>`;
+        quizContainer.innerHTML = `<p>${tr("Scrub the whale with your finger or the mouse to wash it!")}</p>`;
       }
     }
 
@@ -447,10 +500,10 @@
       const quizContainer = document.getElementById("quizContainer");
       var htmlOutput = []
       if (playerScore < 3) {
-        htmlOutput.push(`<p>Voll richtig! Wasch den Wal nochmal!</p>`);
+        htmlOutput.push(`<p>${tr("Correct! Wash the whale again!")}</p>`);
       }
       else {
-        htmlOutput.push(`<p>Du hast 3x hintereinander richtig geantwortet! Wasch den Wal mit Shampoo!</p>`);        
+        htmlOutput.push(`<p>${tr("You answered correctly 3x in a row! Wash the whale with shampoo!")}</p>`);        
       }
       quizContainer.innerHTML = htmlOutput.join("");
       finished = true;
@@ -461,7 +514,7 @@
       playerScore = 0;
       const quizContainer = document.getElementById("quizContainer");
       var htmlOutput = []
-      htmlOutput.push(`<p>Oh nein, die Antwort war leider falsch! Wasch den Wal nochmal!</p>`);
+      htmlOutput.push(`<p>${tr("Oh no, the answer was wrong! Wash the whale again!")}</p>`);
       quizContainer.innerHTML = htmlOutput.join("");
       finished = true;
     }
@@ -471,7 +524,7 @@
       const quizContainer = document.getElementById("quizContainer");
       var htmlOutput = []
       currQuestion = questionServer.getNextQuestion();
-      htmlOutput.push(`<p>Yay, der Wal ist sauber und gl&uuml;cklich!</p>`);
+      htmlOutput.push(`<p>${tr("Yay, the whale is clean and happy!")}</p>`);
       htmlOutput.push(`<p>${currQuestion.q}</p>`);
       if (Math.random() < 0.5) {
         htmlOutput.push(`<p><button id="correct">${currQuestion.c}</button></p>`);
@@ -547,7 +600,7 @@
   {
     canvas = document.getElementById("gameCanvas");
     adjustCanvasSize();
-    questionServer = new RandomQuestionServer();
+    questionServer = new RandomQuestionServer(gLanguage);
     gamePhase = new IntroPhase();
 
     canvas.addEventListener("touchmove", handleMouseMove);
@@ -558,6 +611,15 @@
   // --------------------------------------------------------------------------
   // START
   // --------------------------------------------------------------------------
+  if (document.getElementById("gameContainer").hasAttribute("lang")) {
+    gLanguage = document.getElementById("gameContainer").getAttribute("lang");
+    if ((gLanguage != "de") && (gLanguage != "en")) {
+      //console.log("Language not supported!");
+      gLanguage = "en"
+    }
+    //console.log("Switching language to", gLanguage)
+  }
+
   resources = new ResourcePreLoader();
   resources.addImage("waveBack", "images/waves-back_700x250.png");
   resources.addImage("waveFront", "images/waves-front_700x250.png");
